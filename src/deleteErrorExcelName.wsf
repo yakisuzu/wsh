@@ -1,0 +1,23 @@
+<!--
+     //TODO: Abstraction extention
+     //TODO: Abstraction name pattern
+-->
+<job>
+  <script language="JScript" src="./module/Msg.js">var msg = new Msg();</script>
+  <script language="JScript" src="./module/Args.js">var args = new Args();</script>
+  <script language="JScript" src="./module/ExcelAdapter.js">var excel = new ExcelAdapter();</script>
+  <script language="JScript">
+    WScript.Echo(msg.start);
+    excel.open(function(){
+      var ar_args = args.get_args();
+      while(true){
+        var st_arg = ar_args.shift();
+        if(st_arg === undefined){
+          break;
+        }
+        excel.edit_excel(st_arg, /^.*$/);
+      }
+    });
+    WScript.Echo(msg.end);
+  </script>
+</job>
