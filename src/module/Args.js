@@ -2,7 +2,7 @@
 var msg = msg || new Msg();
 
 // class
-var Args = function(){
+function Args(){
 };
 
 Args.prototype = {

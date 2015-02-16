@@ -8,16 +8,15 @@
   <script language="JScript" src="./module/ExcelAdapter.js">var excel = new ExcelAdapter();</script>
   <script language="JScript">
     WScript.Echo(msg.start);
-    excel.open(function(){
-      var ar_args = args.get_args();
-      while(true){
-        var st_arg = ar_args.shift();
-        if(st_arg === undefined){
-          break;
-        }
-        excel.edit_excel(st_arg, /^.*$/);
-      }
-    });
+    if(excel.open()){
+      excel.run(
+        function(file){
+          excel.edit_excel(file, /^.*$/);
+        },
+        args.get_args()
+      );
+    }
+    excel.close();
     WScript.Echo(msg.end);
   </script>
 </job>
