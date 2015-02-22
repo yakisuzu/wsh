@@ -1,14 +1,15 @@
-// require
-// nothing
-
-// class
+/**
+ * @constructor
+ */
 function Msg(){
 };
 
-Msg.prototype = {
-  start : 'Wait!',
-  end : 'Done!',
-  no_support : 'Support xls or xlsx!',
-  no_args : 'Please Drag & drop excel file!',
-  error : 'Error!'
-};
+(function(p){
+  p.start = 'Wait!';
+  p.end = 'Done!';
+  p.no_support = 'Support xls or xlsx!';
+  p.no_args = 'Please Drag & drop excel file!';
+  p.error = 'Error!'
+})(
+  Msg.prototype
+  );

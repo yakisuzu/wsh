@@ -1,15 +1,14 @@
-// require
-var msg = msg || new Msg();
-
-// class
+/**
+ * @constructor
+ */
 function Args(){
 };
 
-Args.prototype = {
+(function(p, msg){
   /**
-   * out : Array<String>
+   * @return {Array<String>}
    */
-  get_args : function(){
+  p.getArgs = function(){
     var ws_args = WScript.Arguments;
     if(ws_args.Length === 0){
       WScript.Echo(msg.no_args);
@@ -21,6 +20,8 @@ Args.prototype = {
       ar_args.push(st_arg);
     }
     return ar_args;
-  }
-};
-
+  };
+})(
+  Args.prototype
+  , msg || new Msg()
+  );

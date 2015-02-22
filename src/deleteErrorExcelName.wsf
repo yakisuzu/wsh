@@ -10,10 +10,10 @@
     WScript.Echo(msg.start);
     if(excel.open()){
       excel.run(
-        function(file){
-          excel.edit_excel(file, /^.*$/);
+        function(st_file){
+          excel.editExcel(st_file, /^.*$/);
         },
-        args.get_args()
+        args.getArgs()
       );
     }
     excel.close();

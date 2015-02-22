@@ -1,52 +1,69 @@
-// require
-var msg = msg || new Msg();
-
-// class
+/**
+ * @constructor
+ */
 function ExcelAdapter(){
   this.ws_excel;
 };
 
-ExcelAdapter.prototype = {
+(function(p, msg){
   /**
-   * out : Boolean
+   * @return {Boolean}
    */
-  open : function(){
+  p.open = function(){
     this.ws_excel = WScript.CreateObject('Excel.Application');
     try{
       this.ws_excel.Visible = false;
     }catch(e){
       WScript.Echo(e);
-      return false;
     }
-    return true;
-  },
+    return this.isOpen();
+  };
 
   /**
-   * in : Function(String)
-   * in : Array<String>
+   * @return {Boolean}
    */
-  run : function(run, files){
+  p.isOpen = function(){
+    return this.ws_excel !== undefined;
+  };
+
+  /**
+   * @param {ExcelAdapter~fu_run} fu_run
+   * @param {Array<String>} ar_files
+   */
+  p.run = function(fu_run, ar_files){
     while(true){
-      var st_arg = files.shift();
+      var st_arg = ar_files.shift();
       if(st_arg === undefined){
         break;
       }
-      run(st_arg);
+      fu_run(st_arg);
     }
-  },
+  };
 
-  close : function(){
+  /**
+   * @callback ExcelAdapter~fu_run
+   * @param {String} file
+   */
+
+  /**
+   *
+   */
+  p.close = function(){
     try{
-      if(this.ws_excel !== undefined){
+      if(!this.isOpen()){
         this.ws_excel.Quit();
       }
     }catch(e){
       WScript.Echo(e);
     }
-  },
+  };
 
-  edit_excel : function(st_path, re_ignore){
-    if(st_path.search(/^.+\.xlsx?$/) == -1){
+  /**
+   * @param {String} st_path
+   * @param {RegExp} re_ignore
+   */
+  p.editExcel = function(st_path, re_ignore){
+    if(st_path.search(/^.+\.xlsx?$/) === -1){
       WScript.Echo(msg.no_support);
       return;
     }
@@ -57,7 +74,7 @@ ExcelAdapter.prototype = {
       for(var nu_name_cnt = 0; nu_name_cnt < ws_names.Count; nu_name_cnt++){
         var ws_name = ws_names.Item(nu_name_cnt);
         ws_name.Visible = true;
-        if(ws_name.Name.search(re_ignore) == -1){
+        if(ws_name.Name.search(re_ignore) === -1){
           ar_del_name.push(ws_name);
         }
       }
@@ -77,5 +94,8 @@ ExcelAdapter.prototype = {
       }catch(e){
       }
     }
-  }
-};
+  };
+})(
+  ExcelAdapter.prototype
+  , msg || new Msg()
+  );
