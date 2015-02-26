@@ -4,19 +4,19 @@
 -->
 <job>
   <script language="JScript" src="./module/Msg.js">var msg = new Msg();</script>
-  <script language="JScript" src="./module/Args.js">var args = new Args();</script>
-  <script language="JScript" src="./module/ExcelAdapter.js">var excel = new ExcelAdapter();</script>
+  <script language="JScript" src="./module/Args.js">var args = new Args(msg);</script>
+  <script language="JScript" src="./module/ExcelAdapter.js">var excel = new ExcelAdapter(msg);</script>
   <script language="JScript">
     WScript.Echo(msg.start);
-    if(excel.open()){
-      excel.run(
-        function(st_file){
-          excel.editExcel(st_file, /^.*$/);
-        },
+    if(excel.openExcel()){
+      excel.executeExcel(
         args.getArgs()
+        , function(ws_book){
+          excel.excelErrorNameDelete(ws_book);
+        }
       );
     }
-    excel.close();
+    excel.closeExcel();
     WScript.Echo(msg.end);
   </script>
 </job>
