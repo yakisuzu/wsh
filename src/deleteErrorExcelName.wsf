@@ -8,15 +8,12 @@
   <script language="JScript" src="./module/ExcelAdapter.js">var excel = new ExcelAdapter(msg);</script>
   <script language="JScript">
     WScript.Echo(msg.start);
-    if(excel.openExcel()){
-      excel.executeExcel(
-        args.getArgs()
-        , function(ws_book){
-          excel.excelErrorNameDelete(ws_book);
-        }
-      );
-    }
-    excel.closeExcel();
+    excel.executeExcel(
+      args.getArgs()
+      , function(ws_book){
+        excel.excelErrorNameDelete(ws_book);
+      }
+    );
     WScript.Echo(msg.end);
   </script>
 </job>

@@ -37,7 +37,7 @@ function ExcelAdapter(msg){
    */
   p.closeExcel = function(){
     try{
-      if(this.isOpen()){
+      if(this.isOpenExcel()){
         this.ws_excel.Quit();
       }
     }catch(e){
@@ -55,6 +55,7 @@ function ExcelAdapter(msg){
    * @param {ExcelAdapter~fu_execute} fu_execute
    */
   p.executeExcel = function(ar_files, fu_execute){
+    this.openExcel()
     while(true){
       // repeat arg file
       var st_arg = ar_files.shift();
@@ -84,6 +85,7 @@ function ExcelAdapter(msg){
         }
       }
     }
+    this.closeExcel()
   };
 
   /**
