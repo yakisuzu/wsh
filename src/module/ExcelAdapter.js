@@ -59,7 +59,7 @@ function ExcelAdapter(msg){
 
         // ignore extention at pattern
         if(st_arg.search(/^.+\.xlsx?$/) === -1){
-          WScript.Echo(this.msg.no_support);
+          WScript.Echo(p.self.msg.no_support);
           continue;
         }
 
@@ -69,7 +69,7 @@ function ExcelAdapter(msg){
           ws_book = ws_excel.Workbooks.Open(st_arg);
           fu_execute(ws_book);
         }catch(e){
-          WScript.Echo(this.msg.error + ' ' + st_arg);
+          WScript.Echo(p.self.msg.error + ' ' + st_arg);
         }finally{
           try{
             if(ws_book !== undefined){
