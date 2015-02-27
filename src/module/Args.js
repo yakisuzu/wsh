@@ -8,13 +8,15 @@ function Args(msg){
 };
 
 (function(p){
+  p.self = this;
+
   /**
    * @return {Array<String>}
    */
   p.getArgs = function(){
     var ws_args = WScript.Arguments;
     if(ws_args.Length === 0){
-      WScript.Echo(this.msg.no_args);
+      WScript.Echo(p.self.msg.no_args);
       WScript.Quit();
     }
     var ar_args = [];
