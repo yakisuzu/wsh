@@ -10,7 +10,7 @@ function ExcelAdapter(msg){
 (function(p){
   p.self = this;
 
-  p.excel_error_string = [''];
+  p.excel_error_string = ['#N/A' , '#REF!'];
 
   /**
    * @return {Excel}
@@ -52,10 +52,10 @@ function ExcelAdapter(msg){
   p.executeExcel = function(ar_files, fu_execute){
     var ws_excel = openExcel();
     if(ws_excel !== undefined){
-      while(true){
-        // repeat arg file
-        var st_arg = ar_files.shift();
-        if(st_arg === undefined){break;}
+
+      // repeat arg file
+      for(var nu_arg = 0; nu_arg < ar_files.length; nu_arg++){
+        var st_arg = ar_files[nu_arg];
 
         // ignore extention at pattern
         if(st_arg.search(/^.+\.xlsx?$/) === -1){
@@ -88,27 +88,29 @@ function ExcelAdapter(msg){
    * @throws e
    */
   p.excelErrorNameDelete = function(ws_book){
+    var ar_err = p.excel_error_string;
+
     try{
       var ws_names = ws_book.Names;
-      // var ws_names = this.ws_excel.Workbooks.Item(1).Names;
       var ar_del_name = [];
-      for(var nu_name = 0; nu_name < ws_names.Count; nu_name++){
+      // WScript.Echo('count=' + ws_names.Count);
+      for(var nu_name = 1; nu_name <= ws_names.Count; nu_name++){
         var ws_name = ws_names.Item(nu_name);
         ws_name.Visible = true;
+        // WScript.Echo('{Name : ' + ws_name.Name + ' , value : ' + ws_name + '}');
 
-        var ar_err = JSON.parse(JSON.stringify(p.excel_error_string));
-        while(true){
-          var st_err = ar_err.shift();
-          if(st_err === undefined){break;}
+        for(var nu_err = 0; nu_err < ar_err.length; nu_err++){
+          var st_err = ar_err[nu_err];
 
           // when contains error, add delete array
-          if(ws_name.Name.contains(st_err)){
+          if(ws_name.Value.search(st_err) !== -1){
             ar_del_name.push(ws_name);
           }
         }
       }
 
       // execute error name delete
+      // WScript.Echo('hitcount=' + ar_del_name.length);
       while(true){
         var ws_del = ar_del_name.shift();
         if(ws_del === undefined){break;}
