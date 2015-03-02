@@ -1,54 +1,72 @@
+// TODO setting format
+// TODO show line no
 /**
  * @constructor
- * @param {Msg} msg
  */
-function Logger(msg, level){
-  // Required
-  this.msg = msg || new Msg();
-  // FIXME replace level setting
-  this.level = level || this.Level.INFO;
-
-  this.outputStock = [];
+function Logger(){
 };
 
 (function(p){
-  p.self = this;
+  var ob_level_list = {
+    0 : 'ALL',
+    1 : 'TRACE',
+    2 : 'DEBUG',
+    3 : 'INFO',
+    4 : 'WARN',
+    5 : 'ERROR',
+    6 : 'FATAL',
+    9 : 'OFF'
+  };
 
   p.Level = {};
-  p.Level.OFF = 9;
-  p.Level.FATAL = 6;
-  p.Level.ERROR = 5;
-  p.Level.WARN = 4;
-  p.Level.INFO = 3;
-  p.Level.DEBUG = 2;
-  p.Level.TRACE = 1;
-  p.Level.ALL = -1;
-
-  function outpushPush(level, text){
-    p.self.outputStock.push({'level' : level, 'text' : text});
+  for(var key in ob_level_list){
+    var val = ob_level_list[key];
+    p.Level[val] = key;
   }
 
-  p.fatal = function(text){
-    outputPush(p.Level.FATAL, text);
-  };
-  p.error = function(){};
-  p.warn = function(){};
-  p.info = function(){};
-  p.debug = function(){};
-  p.trace = function(){};
+  var nu_output_level = p.Level.INFO;
 
-  p.build = function(){
-    var outputString = '';
-    while(true){
-      var ob_text = p.self.outputStock.shift();
-      if(ob_text === undefined){break;}
+  var ar_output_stock = [];
 
-      if(p.self.level <= ob_text.level){
-        outputString = outputString + ob_text.text + '\n';
-      }
+  function outputPush(nu_level, st_text){
+    if(nu_output_level <= nu_level){
+      ar_output_stock.push({'level' : nu_level, 'text' : st_text});
     }
-    if(outputString !== ''){
-      WScript.Echo(outputString);
+  }
+
+  p.trace = function(st_text){
+    outputPush(p.Level.TRACE, st_text);
+  };
+  p.debug = function(st_text){
+    outputPush(p.Level.DEBUG, st_text);
+  };
+  p.info = function(st_text){
+    outputPush(p.Level.INFO, st_text);
+  };
+  p.warn = function(st_text){
+    outputPush(p.Level.WARN, st_text);
+  };
+  p.error = function(st_text){
+    outputPush(p.Level.ERROR, st_text);
+  };
+  p.fatal = function(st_text){
+    outputPush(p.Level.FATAL, st_text);
+  };
+
+  p.setOutputLevel = function(nu_level){
+    nu_output_level = nu_level;
+  }
+
+  p.println = function(){
+    var st_output_string = '';
+    while(true){
+      var ob_output = ar_output_stock.shift();
+      if(ob_output === undefined){break;}
+
+      st_output_string = st_output_string + '[' + ob_level_list[ob_output.level] + ']' + ob_output.text + '\n';
+    }
+    if(st_output_string !== ''){
+      WScript.Echo(st_output_string);
     }
   };
 
