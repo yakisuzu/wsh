@@ -3,13 +3,19 @@
      //TODO: Abstraction name pattern
 -->
 <job>
-  <script language="JScript" src="./module/Logger.js">var logger = new Logger();</script>
-  <script language="JScript" src="./module/Msg.js">var msg = new Msg();</script>
-  <script language="JScript" src="./module/Args.js">var args = new Args(logger, msg);</script>
-  <script language="JScript" src="./module/ExcelAdapter.js">var excel = new ExcelAdapter(logger, msg);</script>
+  <script language="JScript" src="./module/Utility.js"></script>
+  <script language="JScript" src="./module/Logger.js">var l = new logger.Logger();</script>
+  <script language="JScript" src="./module/Args.js">var args = new args.Args();</script>
+  <script language="JScript" src="./module/ExcelAdapter.js">var excel = new excelAdapter.ExcelAdapter();</script>
   <script language="JScript">
-    logger.info(msg.start);
-    logger.println();
+    var msg = {};
+    msg.start = 'Wait!';
+    msg.end =  'Done!';
+
+    //l.setOutputLevel(logger.Level.ALL);
+
+    l.info(msg.start);
+    l.println();
 
     excel.executeExcel(
       args.getArgs()
@@ -18,7 +24,7 @@
       }
     );
 
-    logger.info(msg.end);
-    logger.println();
+    l.info(msg.end);
+    l.println();
   </script>
 </job>
