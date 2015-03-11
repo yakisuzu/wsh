@@ -21,9 +21,10 @@ checkImport('logger');
      * @return {Array<String>}
      */
     p.getArgs = function(){
+      var self = this;
       var ws_args = WScript.Arguments;
       if(ws_args.Length === 0){
-        l.info(this.msg.no_args);
+        l.info(self.msg.no_args);
         l.println();
         WScript.Quit();
       }

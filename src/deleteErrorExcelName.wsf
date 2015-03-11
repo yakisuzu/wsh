@@ -1,7 +1,3 @@
-<!--
-     //TODO: Abstraction extention
-     //TODO: Abstraction name pattern
--->
 <job>
   <script language="JScript" src="./module/Utility.js">var u = new utility.Utility();</script>
   <script language="JScript" src="./module/Logger.js">var l = new logger.Logger();</script>
@@ -12,7 +8,7 @@
     msg.start = 'Wait!';
     msg.end =  'Done!';
 
-    //l.setOutputLevel(logger.Level.ALL);
+    l.setOutputLevel(logger.Level.ALL);
 
     l.info(msg.start);
     l.println();
