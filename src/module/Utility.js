@@ -1,6 +1,8 @@
 var utility = {};
 
 (function(mod){
+  var self;
+
   /**
    * @constructor
    */
@@ -12,6 +14,8 @@ var utility = {};
       m.dump_error = 'name:{0}, message:{1}';
       return m;
     })();
+
+    self = this;
   };
 
   (function(p){
@@ -36,7 +40,6 @@ var utility = {};
      * @param {Function} func
      */
     p.each = function(object, func){
-      var self = this;
       var st_class = p.getClass(object);
 
       switch(st_class){
@@ -65,8 +68,6 @@ var utility = {};
      * @param {Object} object
      */
     p.dump = function(object){
-      var self = this;
-
       (function dumpR(object, st_pac){
         var st_class = p.getClass(object);
         var st_pac = (st_pac ? st_pac + '.' : '');
@@ -74,23 +75,30 @@ var utility = {};
         switch(st_class){
           case 'Object':
             p.each(object, function(key, val){
-              p.echo(p.buildMsg(self.msg.dump_object, [key, p.getClass(val), val]));
+              p.echo(p.buildMsg(self.msg.dump_object, [st_pac + key, p.getClass(val), toString(val)]));
               dumpR(val, st_pac + key);
             });
+            function toString(v){
+              var isCast = ['Function'].join().search(p.getClass(v)) !== -1;
+              return (isCast ? v.toString() : v);
+            }
             break;
+
           case 'Function':
             dumpR(object.prototype, st_pac + 'prototype');
             break;
+
           case 'String':
-            p.echo(object);
             break;
+
           case 'Error':
             p.echo(p.buildMsg(self.msg.dump_error, [object.name, object.message]));
             break;
+
           default:
             p.echo(p.buildMsg(self.msg.not_support, [st_class]));
         }
-      })(object, 'root');
+      })(object);
     };
 
     /**

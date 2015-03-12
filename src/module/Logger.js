@@ -5,16 +5,19 @@ var logger = {};
 function checkImport(m){if(!this[m]){WScript.Echo('not import ' + m);WScript.Quit();}}
 checkImport('utility');
 
-(function(mod, modu){
+(function(mod){
+  var self;
+
   /**
    * @constructor
    */
   mod.Logger = function(){
+    self = this;
   };
 
   mod.Level = {};
 
-  (function(p, u){
+  (function(p, ut){
     var ob_level_list = {
       0 : 'ALL',
       1 : 'TRACE',
@@ -27,7 +30,7 @@ checkImport('utility');
     };
 
     // for logger.Level setting
-    u.each(ob_level_list, function(key, val){
+    ut.each(ob_level_list, function(key, val){
       mod.Level[val] = key;
     });
 
@@ -106,12 +109,12 @@ checkImport('utility');
       }
 
       if(st_output_string !== ''){
-        u.echo(st_output_string);
+        ut.echo(st_output_string);
       }
     };
   })(
     mod.Logger.prototype
-    , new modu.Utility()
+    , new utility.Utility()
     );
-})(logger, utility);
+})(logger);
 
