@@ -89,7 +89,15 @@ checkImport('logger');
           // execute execl function
           var ws_book;
           try{
-            ws_book = ws_excel.Workbooks.Open(st_arg);
+            ws_book = ws_excel.Workbooks.Open(
+                /* FileName */ st_arg,
+                /* UpdateLinks */ 0,
+                /* ReadOnly */ false,
+                /* Format */ null,
+                /* Password */ null,
+                /* WriteResPassword */ null,
+                /* IgnoreReadOnlyRecommended */ true
+                );
             lo.trace(ut.buildMsg(self.msg.excel_book_open, [st_arg]));
 
             fu_execute(ws_book);
