@@ -5,116 +5,126 @@ var logger = {};
 function checkImport(m){if(!this[m]){WScript.Echo('not import ' + m);WScript.Quit();}}
 checkImport('utility');
 
-(function(mod){
-  var self;
-
-  /**
-   * @constructor
-   */
-  mod.Logger = function(){
-    self = this;
+(function(mod, ut){
+  var ob_level_list = {
+    1 : 'TRACE',
+    2 : 'DEBUG',
+    3 : 'INFO',
+    4 : 'WARN',
+    5 : 'ERROR',
+    6 : 'FATAL'
   };
 
-  mod.Level = {};
-
-  (function(p, ut){
-    var ob_level_list = {
-      0 : 'ALL',
-      1 : 'TRACE',
-      2 : 'DEBUG',
-      3 : 'INFO',
-      4 : 'WARN',
-      5 : 'ERROR',
-      6 : 'FATAL',
-      9 : 'OFF'
-    };
-
-    // for logger.Level setting
+  /**
+   * 
+   */
+  mod.Level = (function(){
+    var level = {};
+    level.ALL = '0';
     ut.each(ob_level_list, function(key, val){
-      mod.Level[val] = key;
+      level[val] = key;
     });
+    level.OFF = '9';
+    return level;
+  })();
 
-    var nu_output_level = mod.Level.INFO;
+  var ar_output_stock = [];
+  var ob_output_setting = (function(){
+    var o = {};
+    o.output_level = mod.Level.INFO;
+    o.header = function(nu_level){return '[' + ob_level_list[nu_level] + ']';};
+    o.linefeed = '\n';
+    o.output = function(st_msg){ut.echo(st_msg);};
+    return o;
+  })();
 
-    var ar_output_stock = [];
+  /**
+   * @param {Number} nu_level
+   * @param {String} st_text
+   */
+  function outputPush(nu_level, st_text){
+    if(ob_output_setting.output_level <= nu_level){
+      ar_output_stock.push({'level' : nu_level, 'text' : st_text});
+    }
+  }
 
+  /**
+   * @param {String} st_text
+   */
+  ut.each(ob_level_list, function(key, val){
+    mod[val.toLowerCase()] = function(st_text){
+      outputPush(mod.Level[val], st_text);
+    };
+  });
+
+  /**
+   * @param {String} st_msg
+   * @param {Array<Object>} st_args
+   */
+  ut.each(ob_level_list, function(key, val){
+    mod[val.toLowerCase() + 'Build'] = function(st_msg, ar_args){
+      outputPush(mod.Level[val], ut.buildMsg(st_msg, ar_args));
+    };
+  });
+
+  /**
+   * @param {void}
+   */
+  mod.print = function(){
+    var st_output_string = '';
+    while(true){
+      var ob_output = ar_output_stock.shift();
+      if(!ob_output){break;}
+      st_output_string += ob_output_setting.header(ob_output.level) + ob_output.text + ob_output_setting.linefeed;
+    }
+
+    if(st_output_string !== ''){
+      ob_output_setting.output(st_output_string);
+    }
+  };
+
+  mod.set = {};
+  (function(mods, setting){
     /**
      * @param {Number} nu_level
-     * @param {String} st_text
      */
-    function outputPush(nu_level, st_text){
-      if(nu_output_level <= nu_level){
-        ar_output_stock.push({'level' : nu_level, 'text' : st_text});
-      }
+    mods.outputLevel = function(nu_level){
+      setting.output_level = nu_level;
     }
 
     /**
-     * @param {String} st_text
-     */
-    p.trace = function(st_text){
-      outputPush(mod.Level.TRACE, st_text);
-    };
-
-    /**
-     * @param {String} st_text
-     */
-    p.debug = function(st_text){
-      outputPush(mod.Level.DEBUG, st_text);
-    };
-
-    /**
-     * @param {String} st_text
-     */
-    p.info = function(st_text){
-      outputPush(mod.Level.INFO, st_text);
-    };
-
-    /**
-     * @param {String} st_text
-     */
-    p.warn = function(st_text){
-      outputPush(mod.Level.WARN, st_text);
-    };
-
-    /**
-     * @param {String} st_text
-     */
-    p.error = function(st_text){
-      outputPush(mod.Level.ERROR, st_text);
-    };
-
-    /**
-     * @param {String} st_text
-     */
-    p.fatal = function(st_text){
-      outputPush(mod.Level.FATAL, st_text);
-    };
-
-    /**
+     * @callback logger.set~fu_header
      * @param {Number} nu_level
      */
-    p.setOutputLevel = function(nu_level){
-      nu_output_level = nu_level;
-    }
+    /**
+     * @param {logger.set~fu_header} fu_header
+     */
+    mods.header = function(fu_header){
+      setting.header = fu_header;
+    };
 
     /**
-     *
+     *@param {String} st_linefeed
      */
-    p.println = function(){
-      var st_output_string = '';
-      while(true){
-        var ob_output = ar_output_stock.shift();
-        if(!ob_output){break;}
-        st_output_string += '[' + ob_level_list[ob_output.level] + ']' + ob_output.text + '\n';
-      }
-
-      if(st_output_string !== ''){
-        ut.echo(st_output_string);
-      }
+    mods.linefeed = function(st_linefeed){
+      setting.linefeed = st_linefeed;
     };
-  })(
-    mod.Logger.prototype
-    , new utility.Utility()
-    );
-})(logger);
+
+    /**
+     * @callback logger.set~fu_output
+     * @param {String} st_msg
+     */
+    /**
+     * @param {logger.set~fu_output} fu_output
+     */
+    mods.output = function(fu_output){
+      setting.output = fu_output;
+    };
+
+  })(mod.set, ob_output_setting);
+
+})(
+  logger
+  , new utility.Utility()
+  );
 

@@ -5,6 +5,7 @@ checkImport('utility');
 checkImport('logger');
 
 (function(mod){
+  // TODO self is affected by other instances
   var self;
 
   /**
@@ -34,7 +35,7 @@ checkImport('logger');
     self = this;
   };
 
-  (function(p, ut, lo){
+  (function(p, ut){
     /**
      * @return {Excel}
      */
@@ -43,7 +44,7 @@ checkImport('logger');
       try{
         ws_excel = WScript.CreateObject('Excel.Application');
         ws_excel.Visible = false;
-        lo.trace(self.msg.excel_start);
+        logger.trace(self.msg.excel_start);
       }catch(e){
         ut.dump(e);
       }
@@ -57,7 +58,7 @@ checkImport('logger');
       try{
         if(ws_excel !== undefined){
           ws_excel.Quit();
-          lo.trace(self.msg.excel_end);
+          logger.trace(self.msg.excel_end);
         }
       }catch(e){
         ut.dump(e);
@@ -76,13 +77,13 @@ checkImport('logger');
     p.executeExcel = function(ar_files, fu_execute){
       var ws_excel = openExcel();
       if(ws_excel !== undefined){
-        lo.trace(self.msg.excel_edit_start);
+        logger.trace(self.msg.excel_edit_start);
 
         // repeat arg file
         ut.each(ar_files, function(st_arg){
           // ignore extention at pattern
           if(st_arg.search(/^.+\.xlsx?$/) === -1){
-            lo.warn(self.msg.no_support);
+            logger.warn(self.msg.no_support);
             return;
           }
 
@@ -98,17 +99,17 @@ checkImport('logger');
                 /* WriteResPassword */ null,
                 /* IgnoreReadOnlyRecommended */ true
                 );
-            lo.trace(ut.buildMsg(self.msg.excel_book_open, [st_arg]));
+            logger.traceBuild(self.msg.excel_book_open, [st_arg]);
 
             fu_execute(ws_book);
           }catch(e){
             ut.dump(e);
-            lo.error(ut.buildMsg(self.msg.error, [st_arg]));
+            logger.errorBuild(self.msg.error, [st_arg]);
           }finally{
             try{
               if(ws_book !== undefined){
                 ws_book.Close(true);
-                lo.trace(ut.buildMsg(self.msg.excel_book_close, [st_arg]));
+                logger.traceBuild(self.msg.excel_book_close, [st_arg]);
               }
             }catch(e){
               ut.dump(e);
@@ -127,13 +128,13 @@ checkImport('logger');
       try{
         var ws_names = ws_book.Names;
         var ar_del_name = [];
-        lo.trace(ut.buildMsg(self.msg.excel_name_count, [ws_names.Count]));
+        logger.traceBuild(self.msg.excel_name_count, [ws_names.Count]);
 
         for(var nu_name = 1; nu_name <= ws_names.Count; nu_name++){
           var ws_name = ws_names.Item(nu_name);
           ws_name.Visible = true;
 
-          lo.trace(ut.buildMsg(self.msg.excel_name_value, [ws_name.Name, ws_name.Value]));
+          logger.traceBuild(self.msg.excel_name_value, [ws_name.Name, ws_name.Value]);
 
           if(self.excel_use_ignore_reg){
             ut.each(self.excel_ignore_reg, function(st_ignore){
@@ -154,9 +155,9 @@ checkImport('logger');
         }
 
         // execute error name delete
-        lo.trace(ut.buildMsg(self.msg.excel_name_hit_count, [ar_del_name.length]));
+        logger.traceBuild(self.msg.excel_name_hit_count, [ar_del_name.length]);
         ut.each(ar_del_name, function(ws_del){
-          lo.trace(ut.buildMsg(self.msg.excel_name_delete_value, [ws_name.Name, ws_name.Value]));
+          logger.traceBuild(self.msg.excel_name_delete_value, [ws_name.Name, ws_name.Value]);
           ws_del.Delete();
         });
       }catch(e){
@@ -167,7 +168,6 @@ checkImport('logger');
   })(
     mod.ExcelAdapter.prototype
     , new utility.Utility()
-    , new logger.Logger()
     );
 })(excelAdapter);
 

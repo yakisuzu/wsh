@@ -1,6 +1,7 @@
 var utility = {};
 
 (function(mod){
+  // TODO self is affected by other instances
   var self;
 
   /**
@@ -88,11 +89,12 @@ var utility = {};
             dumpR(object.prototype, st_pac + 'prototype');
             break;
 
-          case 'String':
-            break;
-
           case 'Error':
             p.echo(p.buildMsg(self.msg.dump_error, [object.name, object.message]));
+            break;
+
+          case 'String':
+          case 'Number':
             break;
 
           default:
@@ -112,8 +114,6 @@ var utility = {};
       });
       return st_build;
     };
-  })(
-    mod.Utility.prototype
-    );
+  })(mod.Utility.prototype);
 })(utility);
 

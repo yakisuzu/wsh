@@ -1,6 +1,6 @@
 <job>
   <script language="JScript" src="./module/Utility.js">var ut = new utility.Utility();</script>
-  <script language="JScript" src="./module/Logger.js">var lo = new logger.Logger();</script>
+  <script language="JScript" src="./module/Logger.js"></script>
   <script language="JScript" src="./module/Args.js">var ar = new args.Args();</script>
   <script language="JScript" src="./module/ExcelAdapter.js">var excel = new excelAdapter.ExcelAdapter();</script>
   <script language="JScript">
@@ -8,10 +8,10 @@
     msg.start = 'Wait!';
     msg.end =  'Done!';
 
-    lo.setOutputLevel(logger.Level.ALL);
+    logger.set.outputLevel(logger.Level.ALL);
 
-    lo.info(msg.start);
-    lo.println();
+    logger.info(msg.start);
+    logger.print();
 
     excel.executeExcel(
       ar.getArgs()
@@ -20,7 +20,7 @@
       }
     );
 
-    lo.info(msg.end);
-    lo.println();
+    logger.info(msg.end);
+    logger.print();
   </script>
 </job>

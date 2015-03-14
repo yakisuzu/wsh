@@ -4,6 +4,7 @@ function checkImport(m){if(!this[m]){WScript.Echo('not import ' + m);WScript.Qui
 checkImport('logger');
 
 (function(mod){
+  // TODO self is affected by other instances
   var self;
 
   /**
@@ -19,29 +20,26 @@ checkImport('logger');
     self = this;
   };
 
-  (function(p, lo){
+  (function(p){
     /**
      * @return {Array<String>}
      */
     p.getArgs = function(){
       var ws_args = WScript.Arguments;
       if(ws_args.Length === 0){
-        lo.info(self.msg.no_args);
-        lo.println();
+        logger.info(self.msg.no_args);
+        logger.print();
         WScript.Quit();
       }
 
       var ar_args = [];
       for(var nu_arg = 0; nu_arg < ws_args.Length; nu_arg++){
         var st_arg = ws_args.Item(nu_arg);
-        lo.trace(st_arg);
+        logger.trace(st_arg);
         ar_args.push(st_arg);
       }
       return ar_args;
     };
-  })(
-    mod.Args.prototype
-    , new logger.Logger()
-    );
+  })(mod.Args.prototype);
 })(args);
 
