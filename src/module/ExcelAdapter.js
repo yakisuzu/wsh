@@ -69,7 +69,6 @@ checkImport('logger');
      * @callback ExcelAdapter~fu_execute
      * @param {Workbook} ws_book
      */
-
     /**
      * @param {Array<String>} ar_files
      * @param {ExcelAdapter~fu_execute} fu_execute
@@ -80,7 +79,8 @@ checkImport('logger');
         logger.trace(self.msg.excel_edit_start);
 
         // repeat arg file
-        ut.each(ar_files, function(st_arg){
+        for(var i = 0; i < ar_files.length; i++){
+          var st_arg = ar_files[i];
           // ignore extention at pattern
           if(st_arg.search(/^.+\.xlsx?$/) === -1){
             logger.warn(self.msg.no_support);
@@ -115,56 +115,102 @@ checkImport('logger');
               ut.dump(e);
             }
           }
-        });
+        };
         closeExcel(ws_excel);
       }
     };
 
     /**
-     * @param {Workbook} ws_book
-     * @throws e
+     * @callback ExcelAdapter~fu_execute
+     * @param {Object<Excel>} ws_item
      */
-    p.excelErrorNameDelete = function(ws_book){
-      try{
-        var ws_names = ws_book.Names;
-        var ar_del_name = [];
-        logger.traceBuild(self.msg.excel_name_count, [ws_names.Count]);
-
-        for(var nu_name = 1; nu_name <= ws_names.Count; nu_name++){
-          var ws_name = ws_names.Item(nu_name);
-          ws_name.Visible = true;
-
-          logger.traceBuild(self.msg.excel_name_value, [ws_name.Name, ws_name.Value]);
-
-          if(self.excel_use_ignore_reg){
-            ut.each(self.excel_ignore_reg, function(st_ignore){
-              // when not found regex, add delete array
-              if(ws_name.Value.search(st_ignore) === -1){
-                ar_del_name.push(ws_name);
-              }
-            });
-
-          }else{
-            ut.each(self.excel_error_reg, function(st_err){
-              // when contains error, add delete array
-              if(ws_name.Value.search(st_err) !== -1){
-                ar_del_name.push(ws_name);
-              }
-            });
-          }
-        }
-
-        // execute error name delete
-        logger.traceBuild(self.msg.excel_name_hit_count, [ar_del_name.length]);
-        ut.each(ar_del_name, function(ws_del){
-          logger.traceBuild(self.msg.excel_name_delete_value, [ws_name.Name, ws_name.Value]);
-          ws_del.Delete();
-        });
-      }catch(e){
-        ut.dump(e);
-        throw e
+    /**
+     * @param {Object<Excel>} ws
+     * @param {ExcelAdapter~fu_execute} fu_execute
+     */
+    p.eachItem = function(ws, fu_execute){
+      for(var nu_ws = 1; nu_ws <= ws.Count; nu_ws++){
+        fu_execute(ws.Item(nu_ws));
       }
     };
+
+    /**
+     * @callback ExcelAdapter~fu_execute
+     * @param {Worksheet} ws_sheet
+     */
+    /**
+     * @param {Workbook} ws_book
+     * @param {ExcelAdapter~fu_execute} fu_execute
+     */
+    p.eachSheet = function(ws_book, fu_execute){
+      var ws_sheets = ws_book.Worksheets;
+      logger.traceBuild(self.msg.excel_name_count, [ws_sheets.Count]);
+      p.eachItem(ws_sheets, function(ws_sheet){
+        logger.traceBuild(self.msg.excel_name_count, [ws_sheet.Name]);
+        fu_execute(ws_sheet);
+      });
+    };
+
+    /**
+     * @param {Workbook} ws_book
+     */
+    p.excelErrorNameDelete = function(ws_book){
+      var ws_names = ws_book.Names;
+      var ar_del_name = [];
+
+      logger.traceBuild(self.msg.excel_name_count, [ws_names.Count]);
+      p.eachItem(ws_names, function(ws_name){
+        logger.traceBuild(self.msg.excel_name_value, [ws_name.Name, ws_name.Value]);
+
+        ws_name.Visible = true;
+
+        if(self.excel_use_ignore_reg){
+          for(var i = 0; i < self.excel_ignore_reg.length; i++){
+            var st_ignore = self.excel_ignore_reg[i];
+
+            // when not found regex, add delete array
+            if(ws_name.Value.search(st_ignore) === -1){
+              ar_del_name.push(ws_name);
+              break;
+            }
+          };
+
+        }else{
+          for(var i = 0; i < self.excel_error_reg.length; i++){
+            var st_err = self.excel_error_reg[i];
+
+            // when contains error, add delete array
+            if(ws_name.Value.search(st_err) !== -1){
+              ar_del_name.push(ws_name);
+              break;
+            }
+          };
+        }
+      });
+
+      // execute error name delete
+      logger.traceBuild(self.msg.excel_name_hit_count, [ar_del_name.length]);
+      while(ar_del_name.length !== 0){
+        var ws_del = ar_del_name.pop();
+        logger.traceBuild(self.msg.excel_name_delete_value, [ws_del.Name, ws_del.Value]);
+        ws_del.Delete();
+      };
+    };
+
+    /**
+     * @param {Workbook} ws_book
+     */
+    p.excelErrorFormatDelete = function(ws_book){
+      // TODO coding
+      p.eachSheet(ws_book, funtion(ws_sheet){
+        var ws_fcs = ws_sheet.Cells.FormatConditions;
+        p.eachItem(ws_fcs, function(ws_fc){
+          // ws_fc.Formula1;
+          // ws_fc.Formula2;
+        });
+      });
+    }
+
   })(
     mod.ExcelAdapter.prototype
     , new utility.Utility()
