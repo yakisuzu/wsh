@@ -84,7 +84,7 @@ checkImport('logger');
           // ignore extention at pattern
           if(st_arg.search(/^.+\.xlsx?$/) === -1){
             logger.warn(self.msg.no_support);
-            return;
+            continue;
           }
 
           // execute execl function
@@ -115,7 +115,7 @@ checkImport('logger');
               ut.dump(e);
             }
           }
-        };
+        }
         closeExcel(ws_excel);
       }
     };
@@ -152,6 +152,34 @@ checkImport('logger');
     };
 
     /**
+     * @param {String} st_value
+     * @return {Boolean}
+     */
+    p.isErrorValue = function(st_value){
+      if(self.excel_use_ignore_reg){
+        for(var i = 0; i < self.excel_ignore_reg.length; i++){
+          var st_ignore = self.excel_ignore_reg[i];
+
+          // when not found regex, value is error
+          if(ws_name.Value.search(st_ignore) === -1){
+            return true;
+          }
+        }
+
+      }else{
+        for(var i = 0; i < self.excel_error_reg.length; i++){
+          var st_err = self.excel_error_reg[i];
+
+          // when contains error, value is error
+          if(ws_name.Value.search(st_err) !== -1){
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    /**
      * @param {Workbook} ws_book
      */
     p.excelErrorNameDelete = function(ws_book){
@@ -164,27 +192,9 @@ checkImport('logger');
 
         ws_name.Visible = true;
 
-        if(self.excel_use_ignore_reg){
-          for(var i = 0; i < self.excel_ignore_reg.length; i++){
-            var st_ignore = self.excel_ignore_reg[i];
-
-            // when not found regex, add delete array
-            if(ws_name.Value.search(st_ignore) === -1){
-              ar_del_name.push(ws_name);
-              break;
-            }
-          };
-
-        }else{
-          for(var i = 0; i < self.excel_error_reg.length; i++){
-            var st_err = self.excel_error_reg[i];
-
-            // when contains error, add delete array
-            if(ws_name.Value.search(st_err) !== -1){
-              ar_del_name.push(ws_name);
-              break;
-            }
-          };
+        // add delete array
+        if(p.isErrorValue(ws_name.Value)){
+          ar_del_name.push(ws_name);
         }
       });
 
@@ -194,20 +204,30 @@ checkImport('logger');
         var ws_del = ar_del_name.pop();
         logger.traceBuild(self.msg.excel_name_delete_value, [ws_del.Name, ws_del.Value]);
         ws_del.Delete();
-      };
+      }
     };
 
     /**
      * @param {Workbook} ws_book
      */
     p.excelErrorFormatDelete = function(ws_book){
-      // TODO coding
+      // TODO LOG
       p.eachSheet(ws_book, funtion(ws_sheet){
+
         var ws_fcs = ws_sheet.Cells.FormatConditions;
+        var ar_del_fc = [];
         p.eachItem(ws_fcs, function(ws_fc){
-          // ws_fc.Formula1;
-          // ws_fc.Formula2;
+          // add delete array
+          // TODO check ws_fc.Formula2
+          if(p.isErrorValue(ws_fc.Formula1)){
+            ar_del_fc.push(ws_fc);
+          }
         });
+
+        while(ar_del_fc.length !== 0){
+          var ws_del = ar_del_fc.pop();
+          ws_del.Delete();
+        }
       });
     }
 
