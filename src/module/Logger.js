@@ -1,80 +1,69 @@
 // TODO setting format
 // TODO show line no
-var logger = {};
+module.logger = (function(){
+  var mod = {};
 
-function checkImport(m){if(!this[m]){WScript.Echo('not import ' + m);WScript.Quit();}}
-checkImport('utility');
+  // import
+  var utility = module.utility;
 
-(function(mod, ut){
-  var ob_level_list = {
-    1 : 'TRACE',
-    2 : 'DEBUG',
-    3 : 'INFO',
-    4 : 'WARN',
-    5 : 'ERROR',
-    6 : 'FATAL'
-  };
+  // static private
+  var ar_output_stock = [];
 
   /**
-   * 
+   * Object
    */
-  mod.Level = (function(){
+  mod.level = (function(){
     var level = {};
-    level.ALL = '0';
-    ut.each(ob_level_list, function(key, val){
-      level[val] = key;
-    });
-    level.OFF = '9';
+    level.ALL = 0;
+    for(var key in getLevelList()){
+      level[key] = getLevelList()[key];
+    }
+    level.OFF = 9;
     return level;
   })();
 
-  var ar_output_stock = [];
+  // static private
   var ob_output_setting = (function(){
     var o = {};
-    o.output_level = mod.Level.INFO;
-    o.header = function(nu_level){return '[' + ob_level_list[nu_level] + ']';};
+    o.output_level = mod.level.INFO;
+    o.header = function(st_level){return '[' + st_level + ']';};
     o.linefeed = '\n';
-    o.output = function(st_msg){ut.echo(st_msg);};
+    o.output = function(st_msg){utility.echo(st_msg);};
     return o;
   })();
 
   /**
-   * @param {Number} nu_level
+   * Declare the module in a loop
    * @param {String} st_text
    */
-  function outputPush(nu_level, st_text){
-    if(ob_output_setting.output_level <= nu_level){
-      ar_output_stock.push({'level' : nu_level, 'text' : st_text});
-    }
+  for(var key in getLevelList()){
+    mod[key.toLowerCase()] = (function(key){
+      return function(st_text){
+        outputPush(key, st_text);
+      };
+    })(key);
   }
 
   /**
-   * @param {String} st_text
-   */
-  ut.each(ob_level_list, function(key, val){
-    mod[val.toLowerCase()] = function(st_text){
-      outputPush(mod.Level[val], st_text);
-    };
-  });
-
-  /**
+   * Declare the module in a loop
    * @param {String} st_msg
    * @param {Array<Object>} st_args
    */
-  ut.each(ob_level_list, function(key, val){
-    mod[val.toLowerCase() + 'Build'] = function(st_msg, ar_args){
-      outputPush(mod.Level[val], ut.buildMsg(st_msg, ar_args));
-    };
-  });
+  for(var key in getLevelList()){
+    mod[key.toLowerCase() + 'Build'] = (function(key){
+      return function(st_msg, ar_args){
+        outputPush(key, utility.buildMsg(st_msg, ar_args));
+      };
+    })(key);
+  }
 
   /**
    * @param {void}
    */
   mod.print = function(){
     var st_output_string = '';
-    while(true){
+    while(ar_output_stock.length !== 0){
       var ob_output = ar_output_stock.shift();
-      if(!ob_output){break;}
       st_output_string += ob_output_setting.header(ob_output.level) + ob_output.text + ob_output_setting.linefeed;
     }
 
@@ -83,18 +72,22 @@ checkImport('utility');
     }
   };
 
-  mod.set = {};
-  (function(mods, setting){
+  /**
+   * Object
+   */
+  mod.set = (function(setting){
+    var mods = {};
+
     /**
-     * @param {Number} nu_level
+     * @param {Number} nu_level_value
      */
-    mods.outputLevel = function(nu_level){
-      setting.output_level = nu_level;
+    mods.outputLevel = function(nu_level_value){
+      setting.output_level = nu_level_value;
     }
 
     /**
      * @callback logger.set~fu_header
-     * @param {Number} nu_level
+     * @param {String} st_level
      */
     /**
      * @param {logger.set~fu_header} fu_header
@@ -121,10 +114,37 @@ checkImport('utility');
       setting.output = fu_output;
     };
 
-  })(mod.set, ob_output_setting);
+    return mods;
+  })(ob_output_setting);
 
-})(
-  logger
-  , new utility.Utility()
-  );
+  /**
+   * private
+   * @return {Object}
+   */
+  function getLevelList(){
+    return (function(){
+      var list = {};
+      list.TRACE = 1;
+      list.DEBUG = 2;
+      list.INFO = 3;
+      list.WARN = 4;
+      list.ERROR = 5;
+      list.FATAL = 6;
+      return list;
+    })();
+  }
+
+  /**
+   * private
+   * @param {String} st_level
+   * @param {String} st_text
+   */
+  function outputPush(st_level, st_text){
+    if(ob_output_setting.output_level <= getLevelList()[st_level]){
+      ar_output_stock.push({'level' : st_level, 'text' : st_text});
+    }
+  }
+
+  return mod;
+})();
 

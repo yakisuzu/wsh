@@ -23,7 +23,7 @@
     excelAdapter.executeExcel(
       args.getArgs()
       , function(ws_book){
-        excel.excelErrorNameDelete(ws_book);
+        excel.excelErrorFormatDelete(ws_book);
       }
     );
 

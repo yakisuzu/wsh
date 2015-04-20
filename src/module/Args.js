@@ -1,45 +1,43 @@
-var args = {};
+module.args = (function(){
+  var mod = {};
 
-function checkImport(m){if(!this[m]){WScript.Echo('not import ' + m);WScript.Quit();}}
-checkImport('logger');
-
-(function(mod){
-  // TODO self is affected by other instances
-  var self;
+  // import
+  var utility = module.utility;
+  utility.checkImport('Args', 'logger');
+  var logger = module.logger;
 
   /**
-   * @constructor
+   * @return {Array<String>}
    */
-  mod.Args = function(){
-    this.msg = (function(){
-      var m  ={};
-      m.no_args = 'Please Drag & drop excel file!';
-      return m;
-    })();
+  mod.getArgs = function(){
+    var ws_args = WScript.Arguments;
+    if(ws_args.Length === 0){
+      logger.info(getMsg().no_args);
+      logger.print();
+      WScript.Quit();
+    }
 
-    self = this;
+    var ar_args = [];
+    for(var nu_arg = 0; nu_arg < ws_args.Length; nu_arg++){
+      var st_arg = ws_args.Item(nu_arg);
+      logger.trace(st_arg);
+      ar_args.push(st_arg);
+    }
+    return ar_args;
   };
 
-  (function(p){
-    /**
-     * @return {Array<String>}
-     */
-    p.getArgs = function(){
-      var ws_args = WScript.Arguments;
-      if(ws_args.Length === 0){
-        logger.info(self.msg.no_args);
-        logger.print();
-        WScript.Quit();
-      }
+  /**
+   * private
+   * @return {Object}
+   */
+  function getMsg(){
+    return (function(){
+      var m  ={};
+      m.no_args = 'Please drag & drop any file!';
+      return m;
+    })();
+  }
 
-      var ar_args = [];
-      for(var nu_arg = 0; nu_arg < ws_args.Length; nu_arg++){
-        var st_arg = ws_args.Item(nu_arg);
-        logger.trace(st_arg);
-        ar_args.push(st_arg);
-      }
-      return ar_args;
-    };
-  })(mod.Args.prototype);
-})(args);
+  return mod;
+})();
 
