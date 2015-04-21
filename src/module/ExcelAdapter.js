@@ -21,9 +21,11 @@ module.excelAdapter = (function(){
      * @return {Boolean}
      */
     p.isErrorValue = function(st_value){
-      if(this.excel_use_ignore_reg){
-        for(var i = 0; i < this.excel_ignore_reg.length; i++){
-          var st_ignore = this.excel_ignore_reg[i];
+      var self = this;
+
+      if(self.excel_use_ignore_reg){
+        for(var i = 0; i < self.excel_ignore_reg.length; i++){
+          var st_ignore = self.excel_ignore_reg[i];
 
           // when not found regex, value is error
           if(st_value.search(st_ignore) === -1){
@@ -32,8 +34,8 @@ module.excelAdapter = (function(){
         }
 
       }else{
-        for(var i = 0; i < this.excel_error_reg.length; i++){
-          var st_err = this.excel_error_reg[i];
+        for(var i = 0; i < self.excel_error_reg.length; i++){
+          var st_err = self.excel_error_reg[i];
 
           // when contains error, value is error
           if(st_value.search(st_err) !== -1){
@@ -48,6 +50,8 @@ module.excelAdapter = (function(){
      * @param {Workbook} ws_book
      */
     p.excelErrorNameDelete = function(ws_book){
+      var self = this;
+
       var ws_names = ws_book.Names;
       logger.traceBuild(getMsg().excel_name_count, [ws_names.Count]);
 
@@ -58,7 +62,7 @@ module.excelAdapter = (function(){
         ws_name.Visible = true;
 
         // add delete array
-        if(p.isErrorValue(ws_name.Value)){
+        if(p.isErrorValue.call(self, ws_name.Value)){
           ar_del_name.push(ws_name);
         }
       });
@@ -77,6 +81,8 @@ module.excelAdapter = (function(){
      * @param {Workbook} ws_book
      */
     p.excelErrorFormatDelete = function(ws_book){
+      var self = this;
+
       mod.eachSheet(ws_book, function(ws_sheet){
         var ws_fcs = ws_sheet.Cells.FormatConditions;
         logger.traceBuild(getMsg().excel_fc_count, [ws_fcs.Count]);
@@ -88,7 +94,7 @@ module.excelAdapter = (function(){
 
           // TODO check ws_fc.Formula2
           // add delete array
-          if(p.isErrorValue(fc.Formula1)){
+          if(p.isErrorValue.call(self, fc.Formula1)){
             ar_del_fc.push(ws_fc);
           }
         });

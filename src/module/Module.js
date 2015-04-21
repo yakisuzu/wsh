@@ -52,22 +52,25 @@ module.utility = (function(){
       switch(st_class){
         case 'Object':
           for(var key in object){
-            var value = object[key];
-            mod.echo(mod.buildMsg(getMsg().dump_object, [st_pac + key, mod.getClass(value), toString(value)]));
+            var value = '';
+            try{
+              value = object[key];
+            }catch(e){}
+            mod.echo(mod.buildMsg(getMsg().dump_object, [st_pac + key, mod.getClass(value)]));
             dumpR(value, st_pac + key);
-          }
-          function toString(v){
-            var isCast = ['Function'].join().search(mod.getClass(v)) !== -1;
-            return (isCast ? v.toString() : v);
           }
           break;
 
         case 'Array':
-          // TODO coding
-          mod.echo(object.toString());
+          for(var i = 0; i < object.length; i++){
+            var value = object[i];
+            mod.echo(mod.buildMsg(getMsg().dump_array, [st_pac + i, mod.getClass(value)]));
+            dumpR(value, st_pac + i);
+          }
           break;
 
         case 'Function':
+          mod.echo(object.toString());
           dumpR(object.prototype, st_pac + 'prototype');
           break;
 
@@ -75,8 +78,13 @@ module.utility = (function(){
           mod.echo(mod.buildMsg(getMsg().dump_error, [object.name, object.message]));
           break;
 
-        case 'String':
+        case 'Boolean':
         case 'Number':
+        case 'Date':
+        case 'Math':
+        case 'String':
+        case 'RegExp':
+          mod.echo(mod.buildMsg(getMsg().dump_value, [object.toString(), mod.getClass(object)]));
           break;
 
         default:
@@ -94,8 +102,10 @@ module.utility = (function(){
       var m = {};
       m.not_import = '{0} has not been imported into the {1} module';
       m.not_support = '{0} class not support';
-      m.dump_object = 'key:{0}, class:{1}, value:{2}';
-      m.dump_error = 'name:{0}, message:{1}';
+      m.dump_object = 'key : {0}, class : {1}';
+      m.dump_array = 'index : {0}, class : {1}';
+      m.dump_value = 'value : {0}, class : {1}';
+      m.dump_error = 'name : {0}, message : {1}';
       return m;
     })();
   }
